@@ -14,5 +14,8 @@ return {
         ]],
       },
     },
+    picker = {
+      exclude = { ".git" },
+    },
   },
 }
