@@ -10,6 +10,7 @@ return {
       local map = vim.keymap.set
 
       -- Add or skip a cursor by matching word/selection.
+      -- stylua: ignore start
       map({ "n", "x" }, "<C-n>", function() mc.matchAddCursor(1) end, { desc = "Add Cursor Next Match" })
       map({ "n", "x" }, "<C-p>", function() mc.matchAddCursor(-1) end, { desc = "Add Cursor Prev Match" })
       map({ "n", "x" }, "<leader>mn", function() mc.matchAddCursor(1) end, { desc = "Add Cursor Next Match" })
@@ -17,6 +18,7 @@ return {
       map({ "n", "x" }, "<leader>ms", function() mc.matchSkipCursor(1) end, { desc = "Skip Match Forward" })
       map({ "n", "x" }, "<leader>mS", function() mc.matchSkipCursor(-1) end, { desc = "Skip Match Backward" })
       map({ "n", "x" }, "<leader>mA", mc.matchAllAddCursors, { desc = "Add All Matches" })
+      -- stylua: ignore end
 
       -- Add and remove cursors with control + left click.
       map("n", "<C-LeftMouse>", mc.handleMouse, { desc = "Multicursor Mouse Down" })
@@ -31,10 +33,12 @@ return {
       mc.addKeymapLayer(function(layerSet)
 
         -- Add or skip cursor above/below the main cursor.
+        -- stylua: ignore start
         layerSet({ "n", "x" }, "<Up>", function() mc.lineAddCursor(-1) end, { desc = "Add Cursor Above" })
         layerSet({ "n", "x" }, "<Down>", function() mc.lineAddCursor(1) end, { desc = "Add Cursor Below" })
         layerSet({ "n", "x" }, "<leader><Up>", function() mc.lineSkipCursor(-1) end, { desc = "Skip Line Above" })
         layerSet({ "n", "x" }, "<leader><Down>", function() mc.lineSkipCursor(1) end, { desc = "Skip Line Below" })
+        -- stylua: ignore end
 
         -- Select a different cursor as the main one.
         layerSet({ "n", "x" }, "<Left>", mc.prevCursor, { desc = "Previous Cursor" })
