@@ -5,3 +5,16 @@
 --
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults).
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
+
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    if vim.fn.argc() == 1 then
+      local arg = vim.fn.argv(0)
+      if vim.fn.isdirectory(arg) == 1 then
+        vim.schedule(function()
+          vim.cmd.cd(vim.fn.fnameescape(arg))
+        end)
+      end
+    end
+  end,
+})
