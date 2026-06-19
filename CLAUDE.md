@@ -38,7 +38,16 @@ The matching Nix-side configuration lives in the companion dotfiles repo at `mod
 
 ## Format & lint
 
-`stylua` with the rules in `stylua.toml` (2-space indent, 120-col width). Run `stylua .` from the repo root.
+`stylua` with the rules in `stylua.toml` (2-space indent, 120-col width). Run `stylua .` to format from the repo root, or `stylua --check .` to verify without writing.
+
+## Verifying changes
+
+No test suite — verify edits headlessly (no GUI needed; `nvim` may be Nix-wrapped):
+
+- **Startup is clean:** `nvim --headless "+qa"` exits 0 with no output when the config and every spec load without error (custom plugins load at startup since `defaults.lazy = false`).
+- **An override/extra merged as intended:** `nvim --headless -c "lua print(vim.inspect(require('lazy.core.plugin').values(require('lazy.core.config').plugins['<plugin>.nvim'], 'opts', false)))" -c "qa"` prints the final merged `opts` (swap `'opts'` for `'keys'` to check keymaps). This is the reliable way to confirm a `lua/plugins/*.lua` override layered correctly onto a LazyVim extra.
+- **Install a newly added plugin:** `nvim --headless "+Lazy! install" +qa` (installs missing only, re-locks `lazy-lock.json`).
+- **Plugin health:** `:checkhealth <plugin>`; for a lazy-loaded plugin, run `require("lazy").load({ plugins = { "<plugin>.nvim" } })` first or it reports "no healthcheck found".
 
 ## Plugin lock
 
