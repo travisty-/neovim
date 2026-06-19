@@ -31,6 +31,7 @@ local opts = {
     -- version = "*", -- Try installing the latest stable version for plugins that support semver.
   },
   install = { colorscheme = { "tokyonight", "habamax" } },
+  ui = { border = "rounded" },
   checker = {
     enabled = true, -- Check for plugin updates periodically.
     notify = false, -- Notify on update.
