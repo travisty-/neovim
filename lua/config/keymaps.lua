@@ -9,3 +9,7 @@ map("i", "jj", "<Esc>", { desc = "Exit Insert Mode" })
 
 -- Save the current file without closing it.
 map("n", "ZS", "<cmd>update<cr>", { desc = "Save File" })
+
+-- Center the viewport after scrolling up or down.
+map("n", "<C-u>", "<C-u>zz", { desc = "Scroll Up" })
+map("n", "<C-d>", "<C-d>zz", { desc = "Scroll Down" })
