@@ -6,3 +6,6 @@
 local map = vim.keymap.set
 
 map("i", "jj", "<Esc>", { desc = "Exit Insert Mode" })
+
+-- Save the current file without closing it.
+map("n", "ZS", "<cmd>update<cr>", { desc = "Save File" })
