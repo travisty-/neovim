@@ -13,3 +13,6 @@ map("n", "ZS", "<cmd>update<cr>", { desc = "Save File" })
 -- Center the viewport after scrolling up or down.
 map("n", "<C-u>", "<C-u>zz", { desc = "Scroll Up" })
 map("n", "<C-d>", "<C-d>zz", { desc = "Scroll Down" })
+
+-- Exit terminal mode (when in terminals launched with :terminal).
+map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit Terminal Mode" })
