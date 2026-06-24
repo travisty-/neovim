@@ -1,0 +1,12 @@
+root = true
+
+[*]
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+# The dashboard header uses trailing whitespace for alignment.
+[lua/plugins/snacks.lua]
+trim_trailing_whitespace = false
