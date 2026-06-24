@@ -26,6 +26,7 @@ The matching Nix-side configuration lives in the companion dotfiles repo at `mod
 - `init.lua` — bootstrap (one line: `require("config.lazy")`).
 - `lua/config/lazy.lua` — lazy.nvim bootstrap, LazyVim import, extras imports, lazy.setup options. Wrapped via `require("config.nix").override(opts)` — the only line that diverges from the LazyVim starter.
 - `lua/config/{options,keymaps,autocmds}.lua` — LazyVim's per-concern overrides for built-in defaults.
+- `lua/config/<feature>.lua` — self-contained feature modules: helper predicates as named top-level locals, behavior behind `M.setup()`, wired up from a standard config file. E.g. `config/dashboard.lua` (reopen the dashboard after the last buffer closes) is invoked by `config/autocmds.lua`.
 - `lua/config/nix.lua` — the Nix bridge above.
 - `lua/plugins/*.lua` — user plugin specs, auto-imported by `{ import = "plugins" }` in lazy.lua. Each file returns a lazy.nvim spec (table or list).
 
@@ -34,11 +35,14 @@ The matching Nix-side configuration lives in the companion dotfiles repo at `mod
 - **LazyVim extra:** add the import path to the `extras` array in `lazyvim.json`, or toggle via `:LazyExtras`. Browse available extras at `https://www.lazyvim.org/extras`.
 - **New custom plugin:** create `lua/plugins/<name>.lua` returning the lazy.nvim spec.
 - **Override a LazyVim default plugin:** add a spec in `lua/plugins/<name>.lua` referencing the same plugin name with `opts = ...`; lazy.nvim merges by plugin name.
+- **A which-key group / plugin icon:** write glyphs as Lua `\u{XXXX}` escapes, never literal glyphs — e.g. `icon = "\u{f245}"` (multicursor.lua) or `icon = { icon = "\u{ea70}", color = "red" }` (overseer.lua). The escape keeps the source ASCII; a literal Nerd Font / PUA glyph can be silently written as an empty string. Group-icon overrides go in a `lua/plugins/<name>.lua` which-key spec (LazyVim sets `opts_extend = { "spec" }`, so entries append rather than replace).
 - **A tool needed by a plugin on Nix (LSP/formatter/linter):** add it to `extraPackages` in the Nix module, not via Mason.
 
 ## Format & lint
 
 `stylua` with the rules in `stylua.toml` (2-space indent, 120-col width). Run `stylua .` to format from the repo root, or `stylua --check .` to verify without writing.
+
+`.editorconfig` enforces `insert_final_newline` and `trim_trailing_whitespace` across editors (chosen over nvim autocmds for cross-editor parity). Mind the deliberate exceptions: `*.md` and `lua/plugins/snacks.lua` keep trailing whitespace — the dashboard header relies on it for alignment, so don't strip it.
 
 ## Verifying changes
 
