@@ -41,8 +41,7 @@ local function is_eligible_window(win)
 end
 
 -- Scoped to the current tab; prefers the current window or the first eligible
--- window otherwise (e.g. the nameless window that's automatically created
--- when you close the last buffer via the Snacks buffer picker).
+-- window otherwise (e.g. the window containing default "[No Name]" buffer).
 local function find_eligible_window()
   local current = vim.api.nvim_get_current_win()
   if is_eligible_window(current) then
@@ -51,14 +50,36 @@ local function find_eligible_window()
   return vim.iter(vim.api.nvim_tabpage_list_wins(0)):find(is_eligible_window)
 end
 
-local function open_dashboard(win, buf)
-  if Snacks and Snacks.dashboard then
-    Snacks.dashboard({ win = win, buf = buf }) ---@diagnostic disable-line: missing-fields
+-- Discard the default "[No Name]" buffer that Neovim opens to populate an empty window,
+-- but only if that buffer has already been replaced by the Snacks dashboard (no window).
+-- If the window is special (e.g. Snacks buffer picker), wipe it from the list instead.
+local function discard_default_buffer(buf)
+  if not (vim.api.nvim_buf_is_valid(buf) and is_unoccupied_buffer(buf)) then
+    return
+  end
+  local wins = vim.fn.win_findbuf(buf)
+  if vim.tbl_isempty(wins) then
+    vim.api.nvim_buf_delete(buf, { force = true })
+  elseif not vim.iter(wins):any(is_normal_window) then
+    vim.bo[buf].buflisted = false
+    vim.bo[buf].bufhidden = "wipe"
   end
 end
 
--- Closes the Snacks buffer picker when focused. This is a UX workaround to avoid
--- rendering the Snacks dashboard in the preview pane after closing the last buffer.
+-- Open the Snacks dashboard in a buffer it owns, not the default "[No Name]" buffer.
+-- Reusing the default buffer can cause the Snacks dashboard to be rendered in multiple
+-- windows at once, which triggers a resize error: "Invalid cursor line: out of range".
+local function open_dashboard(win)
+  if not (Snacks and Snacks.dashboard) then
+    return
+  end
+  local default = vim.api.nvim_win_get_buf(win)
+  Snacks.dashboard({ win = win }) ---@diagnostic disable-line: missing-fields
+  discard_default_buffer(default)
+end
+
+-- Closes the Snacks buffer picker when focused. This ensures that the
+-- picker doesn't retain focus after closing the last buffer in its list.
 local function close_buffer_picker()
   if not (Snacks and Snacks.picker) then
     return
@@ -84,7 +105,7 @@ function M.setup()
         end
         local win = find_eligible_window()
         if win then
-          open_dashboard(win, vim.api.nvim_win_get_buf(win))
+          open_dashboard(win)
           close_buffer_picker()
           -- Snacks.picker:close() may refocus the picker's origin window
           -- (which isn't guaranteed to be the window the dashboard is in)
