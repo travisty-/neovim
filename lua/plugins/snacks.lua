@@ -17,5 +17,10 @@ return {
     picker = {
       exclude = { ".git" },
     },
+    terminal = {
+      -- Prevent DCS/passthrough wrapping of ANSI OSC-52 escape sequences.
+      -- Otherwise, text copied to the clipboard is leaked into the buffer.
+      shell = { "env", "TMUX=", vim.o.shell },
+    },
   },
 }
