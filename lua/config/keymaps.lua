@@ -7,6 +7,11 @@ local map = vim.keymap.set
 
 map("i", "jj", "<Esc>", { desc = "Exit Insert Mode" })
 
+-- Move macro recording to Q to avoid accidental key presses.
+-- The default replay behavior of Q is still accessible via @@.
+map("n", "Q", "q", { desc = "Record Macro" })
+map("n", "q", "<Nop>")
+
 -- Save the current file without closing it.
 map("n", "ZS", "<cmd>update<cr>", { desc = "Save File" })
 
