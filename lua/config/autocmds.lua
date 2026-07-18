@@ -24,10 +24,5 @@ vim.api.nvim_create_autocmd("VimEnter", {
   end,
 })
 
--- Save session state on layout changes (for tmux-resurrect)
-vim.api.nvim_create_autocmd({ "BufDelete", "BufLeave", "BufWinLeave", "TabLeave", "WinLeave" }, {
-  group = vim.api.nvim_create_augroup("config.autocmds.persistence", { clear = true }),
-  callback = require("snacks.util").debounce(function()
-    require("persistence").save()
-  end, { ms = 100 }),
-})
+-- Save the session on layout changes (for tmux-resurrect).
+require("config.persistence").setup()
