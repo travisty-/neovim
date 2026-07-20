@@ -6,9 +6,6 @@
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults).
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
 
--- Reopen the Snacks dashboard after closing the last buffer.
-require("config.dashboard").setup()
-
 -- Automatically change directories.
 vim.api.nvim_create_autocmd("VimEnter", {
   group = vim.api.nvim_create_augroup("config.autocmds.cd", { clear = true }),

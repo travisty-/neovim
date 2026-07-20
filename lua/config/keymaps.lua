@@ -22,6 +22,15 @@ map("n", "<C-d>", "<C-d>zz", { desc = "Scroll Down" })
 -- Exit terminal mode (when in terminals launched with :terminal).
 map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit Terminal Mode" })
 
+-- stylua: ignore
+-- Toggle the Snacks dashboard in the current window.
+map("n", "<leader>;", function()
+  if vim.bo.filetype ~= "snacks_dashboard"
+    then Snacks.dashboard.open({ win = 0 }) ---@diagnostic disable-line: missing-fields
+    else Snacks.bufdelete()
+  end
+end, { desc = "Toggle Dashboard" })
+
 ---@source ../plugins/smart-splits.lua
 
 local ss = require("smart-splits")
