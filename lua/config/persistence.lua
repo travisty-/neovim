@@ -1,49 +1,66 @@
 local M = {}
 
--- File types persistence.nvim treats as transient (should not be persisted).
+-- Mirrors the file types persistence.nvim's save filter treats as transient.
 local transient_filetypes = { "gitcommit", "gitrebase", "jj" }
 
--- A real, *listed* file buffer (i.e. one captured by `mksession`).
--- Must be listed since `:bd` unlists a buffer but holds onto it.
-local function is_saveable_buffer(buf)
-  return vim.bo[buf].buflisted
-    and vim.bo[buf].buftype == ""
+local function is_file_buffer(buf)
+  return vim.bo[buf].buftype == ""
     and vim.api.nvim_buf_get_name(buf) ~= ""
     and not vim.tbl_contains(transient_filetypes, vim.bo[buf].filetype)
 end
 
-local function any_saveable_buffer()
-  return vim.iter(vim.api.nvim_list_bufs()):any(is_saveable_buffer)
+local function is_open_file_buffer(buf)
+  return vim.bo[buf].buflisted and is_file_buffer(buf)
 end
 
--- Only save sessions that contain real file buffers. Prevents a fileless session from overwriting
--- a good one, and tmux-resurrect restoring it with empty scratch buffers (e.g. Snacks dashboard).
--- Supports "quit without saving" via `active()`, and is ordered to short-circuit before `require()`.
+local function first_open_file_buffer()
+  return vim.iter(vim.api.nvim_list_bufs()):find(is_open_file_buffer)
+end
+
+local function any_file_buffer()
+  return vim.iter(vim.api.nvim_list_bufs()):any(is_file_buffer)
+end
+
 local function save_session()
-  if any_saveable_buffer() and require("persistence").active() then
-    require("persistence").save()
+  local buf = first_open_file_buffer()
+
+  -- Avoid overwriting the session when no files were ever opened, or during "quit without saving".
+  -- Scanning for any file buffers before `require()` avoids loading the plugin unless needed.
+  if not (buf or any_file_buffer()) or not require("persistence").active() then
+    return
   end
+
+  -- If all files were closed before exiting, we write an empty session file so that the next
+  -- launch starts fresh. Calling `save()` here would record an empty layout (arglist, windows),
+  -- which get restored as [No Name] windows on startup.
+  if not buf then
+    vim.fn.writefile({}, require("persistence").current())
+    return
+  end
+
+  -- `mksession` records blank windows for unnamed buffers (e.g. the Snacks dashboard), which get
+  -- restored as [No Name] windows on startup. So we point the window at a real file buffer first.
+  if vim.api.nvim_buf_get_name(0) == "" then
+    vim.api.nvim_win_set_buf(0, buf)
+  end
+
+  require("persistence").save()
 end
 
 function M.setup()
-  local desc = "Save the session on %s (for tmux-resurrect with persistence.nvim)"
   local group = vim.api.nvim_create_augroup("config.persistence.override", { clear = true })
 
-  -- Persistence.nvim's built-in `VimLeavePre` save hook does not filter to only listed buffers,
-  -- which can cause the session to get clobbered on exit with a buffer that was just closed.
-  -- Deleting the group directly instead of `stop()` since that breaks "quit without saving".
+  -- Replace persistence.nvim's built-in save hook: its internal filter includes unlisted buffers,
+  -- so a freshly-closed buffer still matches and clobbers the session on exit. Deleting the augroup
+  -- rather than calling `stop()` keeps "quit without saving" working.
   LazyVim.on_load("persistence.nvim", function()
     pcall(vim.api.nvim_del_augroup_by_name, "persistence")
   end)
 
-  vim.api.nvim_create_autocmd({ "BufDelete", "BufLeave", "BufWinLeave", "TabLeave", "WinLeave" }, {
-    desc = string.format(desc, "layout changes"),
-    group = group,
-    callback = require("snacks.util").debounce(save_session, { ms = 100 }),
-  })
-
+  -- `VimLeavePre` is triggered on SIGTERM/SIGHUP, so saving only on exit still captures the
+  -- current files for tmux-resurrect. Unexpected crashes fall back to the previous session.
   vim.api.nvim_create_autocmd("VimLeavePre", {
-    desc = string.format(desc, "exit"),
+    desc = "Save the session on exit (for tmux-resurrect with persistence.nvim)",
     group = group,
     callback = save_session,
   })

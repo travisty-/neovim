@@ -21,5 +21,5 @@ vim.api.nvim_create_autocmd("VimEnter", {
   end,
 })
 
--- Save the session on layout changes (for tmux-resurrect).
+-- Save the session on exit (for tmux-resurrect).
 require("config.persistence").setup()
