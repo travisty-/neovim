@@ -7,8 +7,12 @@ return {
       TMUX = "",
     },
     terminal = {
-      provider = "native",
-      split_width_percentage = 0.5,
+      provider = "snacks",
+      snacks_win_opts = {
+        height = 0.9,
+        position = "float",
+        width = 0.9,
+      },
     },
   },
   keys = {
