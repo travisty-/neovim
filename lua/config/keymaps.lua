@@ -22,6 +22,9 @@ map("n", "<C-d>", "<C-d>zz", { desc = "Scroll Down" })
 -- Exit terminal mode (when in terminals launched with :terminal).
 map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit Terminal Mode" })
 
+-- Insert new line (explicit fix for embedded terminals).
+map("t", "<S-CR>", "<NL>", { desc = "Insert Newline" })
+
 -- stylua: ignore
 -- Toggle the Snacks dashboard in the current window.
 map("n", "<leader>;", function()
