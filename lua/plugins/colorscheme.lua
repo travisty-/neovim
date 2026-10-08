@@ -2,14 +2,7 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "luna",
-    },
-  },
-  {
-    "wtfox/luna.nvim",
-    lazy = true,
-    opts = {
-      transparent = true,
+      colorscheme = "everforest",
     },
   },
   {
@@ -35,6 +28,13 @@ return {
         italic = true,
         transparency = true,
       },
+    },
+  },
+  {
+    "wtfox/luna.nvim",
+    lazy = true,
+    opts = {
+      transparent = true,
     },
   },
 }
